@@ -4,34 +4,615 @@
   <meta charset="UTF-8">
   <title>Ghibli Park Itinerary Builder</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Bootstrap CSS -->
-  <link
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    rel="stylesheet">
-
-  <!-- Vue CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-
   <style>
+    @font-face {
+      font-family: 'Luna';
+      src: url('assets/fonts/Luna.ttf') format('truetype');
+    }
     
-
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: url('assets/bg-totoro.jpg') no-repeat center center fixed;
+      background-size: cover;
+      padding: 40px 20px;
+    }
+    
+    .app-container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 20px;
+      padding: 25px;
+    }
+    
+    h1, .accordion-button, .generate-btn {
+      font-family: 'Luna', 'Segoe UI', sans-serif;
+    }
+    
+    h1 {
+      text-align: center;
+      color: #99f156;
+      margin-bottom: 25px;
+      font-size: 1.6rem;
+    }
+    
+    .accordion {
+      --bs-accordion-border-width: 0;
+    }
+    
+    .accordion-item {
+      background: transparent;
+      border: none;
+      margin: 0;
+    }
+    
+    .accordion-button {
+      height: 90px;
+      background-size: 100% 100% !important;
+      background-repeat: no-repeat !important;
+      color: #fae25c !important;
+      font-weight: bold;
+      font-size: 1.1rem;
+      border-radius: 0 !important;
+      background-color: rgba(0,0,0,0.25) !important;
+      padding: 0 25px;
+      border: none;
+    }
+    
+    .accordion-button::after {
+      filter: brightness(0) invert(1);
+      transform: rotate(0deg);
+    }
+    
+    .accordion-button.expanded::after {
+      transform: rotate(180deg);
+    }
+    
+    .accordion-button:not(.collapsed)::after {
+      transform: rotate(0deg);
+    }
+    
+    .accordion-button.expanded:not(.collapsed)::after {
+      transform: rotate(180deg);
+    }
+    
+    .accordion-button.expanded {
+      color: #9cf6f7 !important;
+    }
+    
+    .accordion-button.typing-active {
+      color: #fed7f2 !important;
+    }
+    
+    .btn-bg1 { background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url('assets/acc-bg1.png') !important; background-size: 100% 100% !important; }
+    .btn-bg2 { background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url('assets/acc-bg2.png') !important; background-size: 100% 100% !important; }
+    .btn-bg3 { background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url('assets/acc-bg3.png') !important; background-size: 100% 100% !important; }
+    .btn-bg4 { background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url('assets/acc-bg4.png') !important; background-size: 100% 100% !important; }
+    .btn-bg5 { background: linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)), url('assets/acc-bg5.png') !important; background-size: 100% 100% !important; }
+    
+    .accordion-item {
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-top: none;
+    }
+    
+    .accordion-item:first-child {
+      border-top: 1px solid rgba(255, 255, 255, 0.35);
+    }
+    
+    .accordion-collapse {
+      background: #e0f2e0;
+    }
+    
+    .accordion-body {
+      background: #e0f2e0;
+      padding: 18px 22px;
+    }
+    
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+    
+    .form-control, .form-select {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 0.85rem;
+    }
+    
+    .form-check-label {
+      font-size: 0.85rem;
+    }
+    
+    .error-text {
+      font-size: 0.7rem;
+      color: #dc3545;
+      display: block;
+      margin-top: 3px;
+    }
+    
+    .place-card {
+      cursor: pointer;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+      border: 1px solid #ddd;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .place-card.selected {
+      border: 2px solid #28a745;
+      background: #e8f5e9;
+    }
+    
+    .place-card img {
+      height: 120px;
+      width: 100%;
+      object-fit: cover;
+    }
+    
+    .place-card .card-body {
+      padding: 8px;
+      flex: 1;
+    }
+    
+    .place-card .card-title {
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    
+    .place-card .card-description {
+      font-size: 0.7rem;
+      color: #666;
+      margin: 0;
+    }
+    
+    .places-grid {
+      overflow: visible;
+    }
+    
+    .generate-btn {
+      background: #8ecb68;
+      color: white;
+      border: none;
+      padding: 10px 32px;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    
+    .generate-btn:hover {
+      background: #6aad48;
+    }
+    
+    .summary-card {
+      background: #e8f4f8;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      border-left: 5px solid #63e6d2;
+      color: #000000;
+    }
+    
+    .summary-card h2 {
+      font-size: 1.5rem;
+      margin-bottom: 12px;
+      color: #6bbd5a;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+    }
+    
+    .summary-card h3 {
+      font-size: 1.2rem;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    
+    .summary-card ul {
+      margin-bottom: 10px;
+      padding-left: 20px;
+    }
+    
+    .info-line {
+      display: flex;
+      margin-bottom: 5px;
+      flex-wrap: wrap;
+    }
+    
+    .info-label {
+      font-weight: bold;
+      margin-right: 8px;
+    }
+    
+    .info-value {
+      flex: 1;
+    }
+    
+    .selection-hint {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    
+    .mb-3 {
+      margin-bottom: 0.8rem !important;
+    }
+    
+    .two-columns {
+      display: flex;
+      gap: 15px;
+    }
+    .two-columns > div {
+      flex: 1;
+    }
+    
+    .alert-left {
+      text-align: left;
+    }
+    
+    .place-error-alert {
+      padding: 5px 10px;
+      margin-bottom: 10px;
+      font-size: 0.75rem;
+    }
+    
+    @media (max-width: 768px) {
+      .app-container {
+        padding: 15px;
+      }
+      .accordion-button {
+        height: 70px;
+        font-size: 0.9rem;
+        padding: 0 15px;
+      }
+      .accordion-body {
+        padding: 12px 15px;
+      }
+      .two-columns {
+        flex-direction: column;
+        gap: 0;
+      }
+    }
   </style>
-  
 </head>
-
 <body>
-  
+  <div id="app">
+    <div class="app-container">
+      <h1>Ghibli Park Itinerary Builder</h1>
+      
+      <div class="accordion" id="accordionGhibli">
+        
+        <!-- Panel 1: Personal Details -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button btn-bg1" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+                    :class="{ 'expanded': isExpanded.personal, 'typing-active': isTyping.personal }">
+              Personal Details
+            </button>
+          </h2>
+          <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionGhibli">
+            <div class="accordion-body">
+              <div class="two-columns">
+                <div class="mb-3">
+                  <label class="form-label">Full Name</label>
+                  <input type="text" class="form-control" v-model="form.fullName" placeholder="Enter your full name" @focus="onFocus('personal')" @blur="onBlur('personal')">
+                  <span class="error-text" v-if="errors.fullName">{{ errors.fullName }}</span>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Date of Birth</label>
+                  <input type="date" class="form-control" v-model="form.dob" @focus="onFocus('personal')" @blur="onBlur('personal')">
+                  <span class="error-text" v-if="errors.dob">{{ errors.dob }}</span>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label d-block">Gender</label>
+                <div class="form-check form-check-inline">
+                  <input type="radio" class="form-check-input" value="Male" v-model="form.gender" @focus="onFocus('personal')" @blur="onBlur('personal')">
+                  <label class="form-check-label">Male</label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <input type="radio" class="form-check-input" value="Female" v-model="form.gender" @focus="onFocus('personal')" @blur="onBlur('personal')">
+                  <label class="form-check-label">Female</label>
+                </div>
+                <span class="error-text" v-if="errors.gender">{{ errors.gender }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel 2: Ghibli Park Selection -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed btn-bg2" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+                    :class="{ 'expanded': isExpanded.parks, 'typing-active': isTyping.parks }">
+              Ghibli Park Selection
+            </button>
+          </h2>
+          <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionGhibli">
+            <div class="accordion-body">
+              <div class="selection-hint">Click a place to select it. Click it again to deselect it.</div>
+              <div v-if="errors.places" class="alert alert-danger place-error-alert">{{ errors.places }}</div>
+              <div v-if="isLoadingPlaces">Loading...</div>
+              <div v-else-if="placesError" class="alert alert-danger">{{ placesError }}</div>
+              <div v-else>
+                <div class="places-grid">
+                  <div class="row">
+                    <div class="col-md-4 col-sm-6 mb-2" v-for="place in places" :key="place.id">
+                      <div class="place-card" @click="togglePlace(place)" :class="{ 'selected': isPlaceSelected(place) }">
+                        <img :src="place.image">
+                        <div class="card-body">
+                          <div class="card-title">{{ place.name }}</div>
+                          <div class="card-description">{{ place.description }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel 3: Visitors Details -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed btn-bg3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree"
+                    :class="{ 'expanded': isExpanded.visitors, 'typing-active': isTyping.visitors }">
+              Visitors Details
+            </button>
+          </h2>
+          <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionGhibli">
+            <div class="accordion-body">
+              <div class="two-columns">
+                <div class="mb-3">
+                  <label class="form-label">Total Visitors</label>
+                  <input type="number" class="form-control" v-model.number="form.totalVisitors" min="1" @focus="onFocus('visitors')" @blur="onBlur('visitors')">
+                  <span class="error-text" v-if="errors.visitors">{{ errors.visitors }}</span>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Number of Children</label>
+                  <input type="number" class="form-control" v-model.number="form.totalChildren" min="0" @focus="onFocus('visitors')" @blur="onBlur('visitors')">
+                  <span class="error-text" v-if="errors.children">{{ errors.children }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel 4: Accommodation -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed btn-bg4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour"
+                    :class="{ 'expanded': isExpanded.accommodation, 'typing-active': isTyping.accommodation }">
+              Accommodation
+            </button>
+          </h2>
+          <div id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionGhibli">
+            <div class="accordion-body">
+              <div class="mb-3">
+                <label class="form-label">Select Accommodation</label>
+                <select class="form-select" v-model="form.accommodation" @focus="onFocus('accommodation')" @blur="onBlur('accommodation')">
+                  <option value="">-- Choose accommodation --</option>
+                  <option v-for="option in accommodationOptions" :value="option">{{ option }}</option>
+                </select>
+                <span class="error-text" v-if="errors.accommodation">{{ errors.accommodation }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Panel 5: Payment Details -->
+        <div class="accordion-item">
+          <h2 class="accordion-header">
+            <button class="accordion-button collapsed btn-bg5" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFive"
+                    :class="{ 'expanded': isExpanded.payment, 'typing-active': isTyping.payment }">
+              Payment Details
+            </button>
+          </h2>
+          <div id="collapseFive" class="accordion-collapse collapse" data-bs-parent="#accordionGhibli">
+            <div class="accordion-body">
+              <div class="two-columns">
+                <div class="mb-3">
+                  <label class="form-label">Name on Card</label>
+                  <input type="text" class="form-control" v-model="form.cardholderName" placeholder="Name on card" @focus="onFocus('payment')" @blur="onBlur('payment')">
+                  <span class="error-text" v-if="errors.paymentName">{{ errors.paymentName }}</span>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">Card Number</label>
+                  <input type="text" class="form-control" v-model="form.cardNumber" placeholder="Card number" maxlength="19" @focus="onFocus('payment')" @blur="onBlur('payment')">
+                  <span class="error-text" v-if="errors.paymentCard">{{ errors.paymentCard }}</span>
+                </div>
+              </div>
+              <div class="two-columns">
+                <div class="mb-3">
+                  <label class="form-label">Expiration Date</label>
+                  <input type="month" class="form-control" v-model="form.expiryDate" @focus="onFocus('payment')" @blur="onBlur('payment')">
+                  <span class="error-text" v-if="errors.paymentExpiry">{{ errors.paymentExpiry }}</span>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label">CVC</label>
+                  <input type="password" class="form-control" v-model="form.cvv" placeholder="CVC" maxlength="4" @focus="onFocus('payment')" @blur="onBlur('payment')">
+                  <span class="error-text" v-if="errors.paymentCvv">{{ errors.paymentCvv }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="text-center mt-4">
+        <button class="generate-btn" @click="generateItinerary">Generate Itinerary</button>
+      </div>
+      
+      <div v-if="generalError" class="alert alert-danger mt-3 alert-left">
+        {{ generalError }}
+      </div>
+      
+      <!-- Summary -->
+      <div v-if="showSummary" class="summary-card">
+        <h2>Your Ghibli Park Itinerary</h2>
+        
+        <h3>Personal Details</h3>
+        <div class="info-line"><span class="info-label">Name:</span><span class="info-value">{{ form.fullName || '-' }}</span></div>
+        <div class="info-line"><span class="info-label">Gender:</span><span class="info-value">{{ form.gender || '-' }}</span></div>
+        <div class="info-line"><span class="info-label">Date of Birth:</span><span class="info-value">{{ form.dob || '-' }}</span></div>
+        
+        <h3>Selected Park Places</h3>
+        <ul>
+          <li v-for="place in selectedPlaces" :key="place.id">{{ place.name }}</li>
+          <li v-if="selectedPlaces.length === 0">None selected</li>
+        </ul>
+        
+        <h3>Visitors Details</h3>
+        <div class="info-line"><span class="info-label">Total Visitors:</span><span class="info-value">{{ form.totalVisitors }}</span></div>
+        <div class="info-line"><span class="info-label">Children:</span><span class="info-value">{{ form.totalChildren }}</span></div>
+        
+        <h3>Accommodation</h3>
+        <div class="info-line"><span class="info-label">Selected Option:</span><span class="info-value">{{ form.accommodation || '-' }}</span></div>
+        
+        <h3>Payment Details</h3>
+        <div class="info-line"><span class="info-label">Name on Card:</span><span class="info-value">{{ form.cardholderName || '-' }}</span></div>
+        <div class="info-line"><span class="info-label">Card Number:</span><span class="info-value">{{ maskedCardNumber }}</span></div>
+        <div class="info-line"><span class="info-label">Expiration Date:</span><span class="info-value">{{ form.expiryDate || '-' }}</span></div>
+        <div class="info-line"><span class="info-label">CVC:</span><span class="info-value">Provided</span></div>
+      </div>
+    </div>
+  </div>
 
-  <!-- Bootstrap JS Bundle: needed for accordion behavior -->
-  <script
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
-  </script>
-
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-  
+    Vue.createApp({
+      data() {
+        return {
+          form: {
+            fullName: '', dob: '', gender: '', totalVisitors: 1, totalChildren: 0,
+            accommodation: '', cardholderName: '', cardNumber: '', expiryDate: '', cvv: ''
+          },
+          errors: {
+            fullName: '', dob: '', gender: '', places: '', visitors: '', children: '',
+            accommodation: '', paymentName: '', paymentCard: '', paymentExpiry: '', paymentCvv: ''
+          },
+          isTyping: { personal: false, parks: false, visitors: false, accommodation: false, payment: false },
+          isExpanded: { personal: false, parks: false, visitors: false, accommodation: false, payment: false },
+          generalError: '',
+          places: [],
+          isLoadingPlaces: false,
+          placesError: '',
+          selectedPlaces: [],
+          accommodationOptions: [
+            'No accommodation needed', 'Forest View Hotel', 'Totoro Family Inn',
+            'Witch Valley Guesthouse', 'Luxury Ghibli Resort'
+          ],
+          showSummary: false
+        }
+      },
+      computed: {
+        maskedCardNumber() {
+          if (!this.form.cardNumber) return '**** **** **** ****'
+          const clean = this.form.cardNumber.replace(/\s/g, '')
+          if (clean.length < 4) return '**** **** **** ' + clean
+          return '**** **** **** ' + clean.slice(-4)
+        }
+      },
+      mounted() {
+        this.loadPlaces()
+        this.setupAccordionListeners()
+      },
+      methods: {
+        isPlaceSelected(place) {
+          return this.selectedPlaces.some(p => p.id === place.id)
+        },
+        onFocus(section) {
+          this.isTyping[section] = true
+        },
+        onBlur(section) {
+          this.isTyping[section] = false
+        },
+        async loadPlaces() {
+          this.isLoadingPlaces = true
+          try {
+            const response = await fetch('ghibli_park.json')
+            this.places = await response.json()
+          } catch {
+            this.placesError = 'Failed to load places'
+          } finally {
+            this.isLoadingPlaces = false
+          }
+        },
+        togglePlace(place) {
+          const index = this.selectedPlaces.findIndex(p => p.id === place.id)
+          if (index === -1) {
+            this.selectedPlaces.push(place)
+          } else {
+            this.selectedPlaces.splice(index, 1)
+          }
+          if (this.selectedPlaces.length > 0 && this.errors.places) {
+            this.errors.places = ''
+          }
+          this.isTyping.parks = true
+        },
+        clearErrors() {
+          for (let key in this.errors) {
+            this.errors[key] = ''
+          }
+          this.generalError = ''
+        },
+        validateForm() {
+          let isValid = true
+          if (!this.form.fullName) { this.errors.fullName = 'Full name is required'; isValid = false }
+          if (!this.form.dob) { this.errors.dob = 'Date of birth is required'; isValid = false }
+          if (!this.form.gender) { this.errors.gender = 'Please select your gender'; isValid = false }
+          if (this.selectedPlaces.length === 0) { this.errors.places = 'Please select at least one Ghibli Park place'; isValid = false }
+          if (!this.form.totalVisitors || this.form.totalVisitors < 1) { this.errors.visitors = 'At least 1 visitor'; isValid = false }
+          if (this.form.totalChildren < 0) { this.errors.children = 'Invalid number'; isValid = false }
+          if (this.form.totalChildren > this.form.totalVisitors) { this.errors.children = 'Children cannot exceed visitors'; isValid = false }
+          if (!this.form.accommodation) { this.errors.accommodation = 'Please select an accommodation option.'; isValid = false }
+          if (!this.form.cardholderName) { this.errors.paymentName = 'Name on card is required'; isValid = false }
+          const cleanCard = this.form.cardNumber.replace(/\s/g, '')
+          if (!this.form.cardNumber || cleanCard.length < 16) { this.errors.paymentCard = 'Card number is required'; isValid = false }
+          if (!this.form.expiryDate) { this.errors.paymentExpiry = 'Expiration date is required'; isValid = false }
+          if (!this.form.cvv || this.form.cvv.length < 3) { this.errors.paymentCvv = 'CVC is required'; isValid = false }
+          return isValid
+        },
+        generateItinerary() {
+          this.clearErrors()
+          this.showSummary = false
+          if (this.validateForm()) {
+            this.showSummary = true
+          } else {
+            this.generalError = 'There are mandatory items pending to be filled. Please complete the required fields.'
+          }
+        },
+        setupAccordionListeners() {
+          const sections = ['personal', 'parks', 'visitors', 'accommodation', 'payment']
+          const targets = ['#collapseOne', '#collapseTwo', '#collapseThree', '#collapseFour', '#collapseFive']
+          sections.forEach((section, index) => {
+            const collapseEl = document.querySelector(targets[index])
+            if (collapseEl) {
+              collapseEl.addEventListener('show.bs.collapse', () => {
+                Object.keys(this.isExpanded).forEach(key => { this.isExpanded[key] = false })
+                this.isExpanded[section] = true
+                this.isTyping[section] = false
+              })
+              collapseEl.addEventListener('hide.bs.collapse', () => {
+                this.isExpanded[section] = false
+                this.isTyping[section] = false
+              })
+            }
+          })
+        }
+      }
+    }).mount('#app')
   </script>
-
 </body>
-
 </html>
